@@ -1,0 +1,382 @@
+<!doctype html>
+<html lang="en">
+  
+  <head>
+    <meta charset="utf-8">
+    
+    <title>NodeJS Metrics with StatsD/Graphite</title>
+    
+    <meta name="description" content="A 30 minute talk about making technical decisions with metrics using NodeJS, StatsD, and Graphite.">
+    <meta name="author" content="Ross Kukulinski">
+    
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
+    <link rel="stylesheet" href="static/css/reveal.min.css">
+    <link rel="stylesheet" href="static/css/theme/default.css" id="theme">
+    
+    <!-- For syntax highlighting -->
+    <link rel="stylesheet" href="static/lib/css/zenburn.css">
+    <!--<link rel="stylesheet" href="static/css/print/pdf.css">-->
+    <!-- If the query includes 'print-pdf', use the PDF print sheet -->
+    <script>
+      document.write( '<link rel="stylesheet" href="static/css/print/' + ( window.location.search.match( /print-pdf/gi ) ? 'pdf' : 'paper' ) + '.css" type="text/css" media="print">' );
+    </script>
+    
+    <!--[if lt IE 9]>
+<script src="lib/js/html5shiv.js"></script>
+<![endif]-->
+  </head>
+  
+  <body ng-app ng-cloak>
+    
+    <div class="reveal">
+      
+      <!-- Any section element inside of this container is displayed as a slide -->
+      <div class="slides">
+        <section>
+          <h2>NodeJS, StatsD, and Graphite</h2>
+          <h3>Making technical decisions with metrics</h3>
+          <p>
+            <small>Created by <a href="http://kukulinski.com">Ross Kukulinski</a> / <a href="http://twitter.com/rosskukulinski">@rosskukulinski</a></small>
+          </p>
+        </section>
+        
+        <section>
+          <h2>Engineers</h2>
+            <img class="fragment" 
+                 width=600
+                 height=450
+                 src="static/images/optimizeAllTheThings.jpg" 
+                 alt="Optimize all the things">
+          <aside class="notes">
+            
+          </aside>
+        </section>
+        
+        <section>
+          <h2>but...</h2>
+          <p class="fragment">We're building complex systems</p>
+          <h2 class="fragment">so...</h2>
+          <div class="fragment">
+            <p>How do you know what to optimize?</p>
+            <p>How do you know if you've been successful?</p>
+          </div>
+        </section>
+        
+        <section>
+          <h2>Metrics</h2>
+            <p>allow you to <em>explore</em></p>
+            <p>allow you to <em>determine</em> what's important</p>
+            <p>allow you to <em>focus</em> on what's important</p>
+            <p><em>enable</em> educated decisions</p>
+        </section>
+        
+        <section>
+          <img src='static/images/prod_post_changes.png' 
+               alt='Example from production'
+               class="stretch">
+        </section>
+        
+        <section>
+          <h2>Graphite</h2>
+          <ul>
+            <li>Stores numeric time-series data</li>
+            <li>Renders graphs of this data on demand</li>
+            <li>Exports data via REST API</li>
+          </ul>
+        </section>
+        
+        <section>
+          <h2>Graphite Architecture</h2>
+          <ul>
+            <li>carbon - daemon that listens for time-series data</li>
+            <li>whisper - database for storing data</li>
+            <li>webapp - webapp that renders graphs</li>
+          </ul>
+        </section>
+        
+        <section>
+          <img src="static/images/graphite.png"
+               alt="Graphite web app"
+               class="stretch">
+        </section>
+        
+        <section>
+          <h2>Data retention</h2>
+          <ul>
+            <li>How often can you produce your data?</li>
+            <li>What is the finest precision you will require?</li>
+            <li>How long will you need that level of precision?</li>
+            <li>What is the coarsest precision you can use?</li>
+            <li>How far back would you ever need to see data?</li>
+    
+          </ul>
+        </section>
+        
+        <section>
+          <h2>StatsD</h2>
+          <ul>
+            <li>NodeJS UDP network daemon</li>
+            <li>Listens for stats and aggregates before sending to graphite</li>
+            <li>Provides support for different types of metrics</li>
+          </ul>
+        </section>
+        
+        <section>
+          <h2>NodeJS StatsD Clients</h2>
+          <ul>
+            <li><a href='https://github.com/sivy/node-statsd'>node-statsd</a></li>
+            <li><a href='https://github.com/msiebuhr/node-statsd-client'>statsd-client</a></li>
+            <li><a href='https://github.com/spreaker/nodejs-statsd-client'>node-statsd-client</a></li>
+            <li><em><a href='https://github.com/dscape/lynx'>Lynx</a></em></li>
+          </ul>
+        </section>
+        
+        <section>
+          <h2>Getting started with Lynx</h2>
+          <p>Install</p>
+          <pre><code data-trim>npm install lynx</code></pre>
+          <p>example1.js:</p>
+          <pre><code data-trim>var lynx = require('lynx');
+var opt = {}; // opt.prefix = 'myPrefix';
+var metrics = new lynx('162.242.212.227', 8125, opt); // StatsD IP & Port
+metrics.gauge('example1.gauge', 300); // Send our first metric</code></pre>
+        </section>
+        
+        <section>
+          <h2>Metric Types</h2>
+          <ul>
+            <li>Gauge</li>
+            <li>Counter</li>
+            <li>Timer</li>
+            <li>Set</li>
+          </ul>
+        </section>
+        
+        <section ng-controller='Example2'>
+          <h3>Gauges</h3>
+          <pre><code data-trim>
+// example2.js
+function updateGauges() {
+  metrics.gauge('example2.gauge1', Math.random()+3);
+  metrics.gauge('example2.gauge2', Math.random());
+  setTimeout(updateGauges, 500);
+}
+updateGauges();</code></pre>
+          <img ng-src="{{imageSource}}">
+          <p><button ng-click='toggleRefresh()'>Toggle</button></p>
+        </section>
+        
+        
+          <section ng-controller='Example3'>
+          <h3>Counters</h3>
+          <pre><code data-trim>
+//example3.js
+function increment() {
+  for (var j=10; j&#8249;Math.random()*40; j++) {
+    metrics.increment('example3.counter2');
+    // metrics.decrement('example3.counter2');
+  }
+  setTimeout(increment, 500);
+}
+increment();</code></pre>
+          <img ng-src="{{imageSource}}">
+          <p><button ng-click='toggleRefresh()'>Toggle</button></p>
+        </section>
+        
+                
+          <section ng-controller='Example4'>
+          <h3>Timers</h3>
+          <pre><code data-trim>
+//example4.js
+function timer() {
+  for (var i=0; i&#8249;20; i++) {
+    metrics.timing('example4.timer1', Math.random()*50); // time in ms
+  }
+  setTimeout(timer, 500);
+}
+timer();
+</code></pre>
+          <img ng-src="{{imageSource}}">
+          <p><button ng-click='toggleRefresh()'>Toggle</button></p>
+        </section>
+        
+        <section ng-controller='Example5'>
+          <pre><code data-trim>
+//example5.js - Timers Redux
+function timer() {
+  var timer = metrics.createTimer('example5.timer1');
+  setTimeout(function(){timer.stop()}, Math.random()*25);
+}
+function timers() {
+  for (var i=0; i&#8249;20; i++) {
+    timer();
+  }
+  setTimeout(timers, 500);
+}
+timers();
+</code></pre>
+          <img ng-src="{{imageSource}}">
+          <p><button ng-click='toggleRefresh()'>Toggle</button></p>
+        </section>
+        
+        <section>
+          <img src="static/images/timers.png">
+        </section>
+        
+        <section ng-controller='Example6'>
+          <h3>Sets</h3>
+                    <pre><code data-trim>
+// example6.js
+function pageVisit(user) {
+  metrics.set('example6.user', user);
+}
+function pick() {
+  pageVisit('ross');
+  pageVisit('ross');
+  if (Math.random() > 0.9) { pageVisit('jared'); }
+  setTimeout(pick, 1000);
+}
+pick();
+</code></pre>
+        <img ng-src="{{imageSource}}">
+        <p><button ng-click='toggleRefresh()'>Toggle</button></p>
+        </section>
+        
+        <section>
+          <h2>Sampling</h2>
+          <p>'really, really frequent' data can overwhelm StatsD</p>
+          <pre><code>
+  metrics.increment('some.counter', 0.1); // Send only 10% of calls
+          </code></pre>
+        </section>
+        
+        
+        <section>
+          <h2><a href='https://github.com/rosskukulinski/lynx-express'>lynx-express</a></h2>
+          Install
+          <pre><code>npm install lynx-express</code></pre>
+          Use Middleware
+          <pre><code>
+// Import lynx and lynx-express
+var lynx = require('lynx');
+var lynxExpress = require('lynx-express');
+
+// Setup your lynx StatsD client as normal
+var metrics = new lynx('162.242.212.227', 8125, {prefix: 'express'});
+
+// Create the lynx Express middleware
+var lynxMiddleware = lynxExpress(metrics);
+
+// Tell Express to use your lynx middleware
+server.use(lynxMiddleware());
+// or server.use(lynxMiddleware({timeByUrl: true});
+          </code></pre>
+        </section>
+        
+        <section>
+          <h2>Express Server</h2>
+          <pre><code>// Express server
+var express = require('express');
+var app = express();
+setupLynxMiddleware(app);
+function randResp(req, res, next) {
+  var offset = 1000;
+  if (Math.random() > 0.95) {
+    offset = offset*2;
+  }
+  setTimeout(function() {res.send(req.url);}, Math.random()*offset);
+};
+app.get('/', randResp);
+app.get('/users/', randResp);
+app.get('/users/:user', randResp);
+app.listen(3000);
+</code></pre>
+        </section>
+        
+        <section>
+          <h2>Timing For Each Route</h2>
+          <img src="static/images/routes.png">
+        </section>
+        
+        <section ng-controller='Express1'>
+          <h2>Express Route Timing</h2>
+          <img ng-src="{{imageSource}}">
+          <p><button ng-click='toggleRefresh()'>Toggle</button></p>
+        </section>
+        
+        <section>
+          <h2>Graphite demo</h2>
+        </section>
+        
+        <section>
+          <h3>Configuration changes</h3>
+          <pre><code data-trim>
+# Changes to /opt/graphite/webapp/content/js/composer_widgets.js
+DEFAULT_CACHE_DURATION = 1 # Cache images and data for 1 minute  
+          </code></pre>
+          
+          <pre><code data-trim>
+// Changes to /opt/graphite/webapp/content/js/composer_widgets.js
+var doRefresh = function () {
+  Composer.updateImage();
+  var interval = 1; // Change refresh rate for widgets to every second                                                                                  
+  button.timer = setTimeout(doRefresh, interval * 1000)
+}  
+          </code></pre>
+          
+          <pre><code data-trim>
+// Changes to /etc/statsd/config.js
+"flushInterval": 1000, 
+          </code></pre>
+        </section>
+        
+        <section>
+          <h1>Thanks!</h1>
+          <p>Ross Kukulinski</p>
+          <p>kukulinski.com | @rosskukulinski</p>
+        </section>
+        
+      </div>
+      
+    </div>
+    
+    <script src="static/lib/js/head.min.js"></script>
+    <script src="static/js/reveal.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.5/angular.min.js"></script>
+    <script src=  "static/js/talk.js"></script>
+    <script>
+      
+      // Full list of configuration options available here:
+      // https://github.com/hakimel/reveal.js#configuration
+      Reveal.initialize({
+        controls: true,
+        progress: true,
+        history: true,
+        center: true,
+        slideNumber: true,
+        
+        theme: Reveal.getQueryHash().theme, // available themes are in /static/css/theme
+        transition: Reveal.getQueryHash().transition || 'default', // default/cube/page/concave/zoom/linear/fade/none
+        
+        // Parallax scrolling
+        // parallaxBackgroundImage: 'https://s3.amazonaws.com/hakim-static/reveal-js/reveal-parallax-1.jpg',
+        // parallaxBackgroundSize: '2100px 900px',
+        
+        // Optional libraries used to extend on reveal.js
+        dependencies: [
+          { src: 'lib/js/classList.js', condition: function() { return !document.body.classList; } },
+          { src: 'static/plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+          { src: 'static/plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+          { src: 'static/plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+          { src: 'static/plugin/zoom-js/zoom.js', async: true, condition: function() { return !!document.body.classList; } },
+          { src: 'static/plugin/notes/notes.js', async: true, condition: function() { return !!document.body.classList; } }
+        ]
+      });
+      
+    </script>
+  </body>
+</html>

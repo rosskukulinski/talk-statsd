@@ -1,0 +1,17 @@
+{
+  "name": "statsd-lynx-talk",
+  "version": "0.0.0",
+  "description": "BayNode Meetup Talk on Graphite/StatsD/Lynx",
+  "main": "scripts/master.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Ross Kukulinski <rossk@labs.asti-usa.com>",
+  "license": "BSD-2-Clause",
+  "dependencies": {
+    "lynx-express": "~0.1.0",
+    "lynx": "0.0.11",
+    "express": "~3.4.7",
+    "benchmark-pages": "0.0.1"
+  }
+}
