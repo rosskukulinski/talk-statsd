@@ -231,13 +231,10 @@ timers();
           <h3>Sets</h3>
                     <pre><code data-trim>
 // example6.js
-function pageVisit(user) {
-  metrics.set('example6.user', user);
-}
 function pick() {
-  pageVisit('ross');
-  pageVisit('ross');
-  if (Math.random() > 0.9) { pageVisit('jared'); }
+  metrics.set('example6.user', 'ross');
+  metrics.set('example6.user', 'ross');
+  if (Math.random() > 0.9) { metrics.set('example6.user', 'jared'); }
   setTimeout(pick, 1000);
 }
 pick();
@@ -284,11 +281,11 @@ var express = require('express');
 var app = express();
 setupLynxMiddleware(app);
 function randResp(req, res, next) {
-  var offset = 1000;
+  var delay = 1000;
   if (Math.random() > 0.95) {
-    offset = offset*2;
+    delay = delay*2;
   }
-  setTimeout(function() {res.send(req.url);}, Math.random()*offset);
+  setTimeout(function() {res.send(req.url);}, Math.random()*delay);
 };
 app.get('/', randResp);
 app.get('/users/', randResp);
