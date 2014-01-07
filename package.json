@@ -2,7 +2,7 @@
   "name": "statsd-lynx-talk",
   "version": "0.0.0",
   "description": "BayNode Meetup Talk on Graphite/StatsD/Lynx",
-  "main": "scripts/master.js",
+  "main": "node scripts/master.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
