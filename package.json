@@ -2,8 +2,9 @@
   "name": "statsd-lynx-talk",
   "version": "0.0.0",
   "description": "BayNode Meetup Talk on Graphite/StatsD/Lynx",
-  "main": "node scripts/master.js",
+  "main": "statsd-talk",
   "scripts": {
+    "start": "node scripts/master.js"
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Ross Kukulinski <rossk@labs.asti-usa.com>",
